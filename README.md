@@ -11,6 +11,8 @@ Note: To run Citibike example pipeline, will need to create a Service Account wi
 ### (1) Store project id and Fernet key as env variables
 
 ``` bash
+export NETWORK_ID="network" # The network id/name where you want to deploy your cluster.
+export SUBNET_ID="subnet" # The subnet id/name to use.
 export PROJECT_ID=$(gcloud config get-value project -q)
 
 if [ ! -f '.keys/fernet.key' ]; then
@@ -34,7 +36,7 @@ gcloud docker -- push gcr.io/${PROJECT_ID}/airflow-gke
 Note: You will also need to create a Service Account for the CloudSQL proxy in Kubernetes.  Create that (Role = "Cloud SQL Client"), download the JSON key, and attach as secret.  Stored in `.keys/airflow-cloudsql.json` in this example.
 
 ``` bash
-terraform apply -var project=${PROJECT_ID}
+terraform apply -var project=${PROJECT_ID} -var network=$(NETWORK_ID) -var subnet=$(SUBNET_ID)
 
 gcloud container clusters get-credentials airflow-cluster
 gcloud config set container/cluster airflow-cluster
@@ -67,3 +69,17 @@ helm install . \
   --set projectId=${PROJECT_ID} \
   --set fernetKey=${FERNET_KEY}
 ```
+
+If you want to redeploy Airflow, get first the name of the release:
+```
+helm list
+```
+
+And then, reinstall it:
+```
+helm upgrade <name> --install  . \
+  --set projectId=${PROJECT_ID}  \
+  --set fernetKey=${FERNET_KEY}
+```
+
+
