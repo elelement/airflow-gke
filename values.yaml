@@ -1,6 +1,6 @@
 
-dagRepo: https://github.com/donaldrauscher/airflow-gke.git
-domain: airflow.donaldrauscher.com
+dagRepo: https://github.com/elelement/airflow-gke.git
+domain: airflow.example.com
 
 web:
   name: web
