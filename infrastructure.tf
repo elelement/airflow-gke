@@ -8,17 +8,22 @@ variable "postgres_pw" {
 }
 
 variable "region" {
-  default = "us-central1"
+  default = "europe-west3"
 }
 
 variable "zone" {
-  default = "us-central1-f"
+  default = "europe-west3-a"
 }
 
 provider "google" {
-  version = "~> 1.5"
+  version = "~> 3.7"
   project = "${var.project}"
   region = "${var.region}"
+}
+
+data "google_compute_network" "default" {
+  project = "${var.project}"
+  name    = "${var.network}"
 }
 
 resource "google_compute_global_address" "airflow-static-ip" {
@@ -34,7 +39,7 @@ resource "google_compute_disk" "airflow-redis-disk" {
 
 resource "google_sql_database_instance" "airflow-db" {
   name = "airflow-db"
-  database_version = "POSTGRES_9_6"
+  database_version = "POSTGRES_11"
   region = "${var.region}"
   settings {
     tier = "db-g1-small"
@@ -55,7 +60,9 @@ resource "google_sql_user" "proxyuser" {
 
 resource "google_container_cluster" "airflow-cluster" {
   name = "airflow-cluster"
-  zone = "${var.zone}"
+  location = "${var.zone}"
+  network = "${var.network}"
+  subnetwork = "${var.subnet}"
   initial_node_count = "1"
   node_config {
     machine_type = "n1-standard-4"
